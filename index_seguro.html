@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat Global Seguro</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial,sans-serif;
+}
+
+body{
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:white;
+}
+
+.chat-container{
+  width:95%;
+  max-width:500px;
+  height:90vh;
+  background:rgba(255,255,255,.05);
+  backdrop-filter:blur(10px);
+  border-radius:20px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 10px 30px rgba(0,0,0,.3);
+}
+
+.chat-header{
+  padding:20px;
+  text-align:center;
+  background:rgba(255,255,255,.05);
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+
+.messages{
+  flex:1;
+  overflow-y:auto;
+  padding:15px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.message{
+  background:rgba(255,255,255,.08);
+  padding:12px;
+  border-radius:12px;
+}
+
+.message strong{
+  color:#38bdf8;
+}
+
+.chat-form{
+  display:flex;
+  gap:10px;
+  padding:15px;
+}
+
+.chat-form input{
+  flex:1;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  outline:none;
+  background:rgba(255,255,255,.1);
+  color:white;
+}
+
+.chat-form button{
+  padding:12px 18px;
+  border:none;
+  border-radius:10px;
+  background:#38bdf8;
+  color:white;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="chat-container">
+
+  <div class="chat-header">
+    <h1>🌍 Chat Global</h1>
+    <p>Firebase Seguro</p>
+  </div>
+
+  <div id="messages" class="messages"></div>
+
+  <form id="chatForm" class="chat-form">
+    <input type="text" id="username" placeholder="Tu nombre" required>
+    <input type="text" id="message" placeholder="Escribe un mensaje..." required>
+    <button type="submit">Enviar</button>
+  </form>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import {
+  getAuth,
+  signInAnonymously
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDQm1SC76r0bIaVIPw9Kv8YJ9rbJWgq_sI",
+  authDomain: "mensajes-g4n1x.firebaseapp.com",
+  projectId: "mensajes-g4n1x",
+  storageBucket: "mensajes-g4n1x.firebasestorage.app",
+  messagingSenderId: "496618955940",
+  appId: "1:496618955940:web:bfae2677828d182fbb7231"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const auth = getAuth(app);
+
+signInAnonymously(auth)
+.then(() => {
+  console.log("Usuario conectado");
+})
+.catch((error) => {
+  console.error(error);
+});
+
+const form = document.getElementById("chatForm");
+const username = document.getElementById("username");
+const message = document.getElementById("message");
+const messages = document.getElementById("messages");
+
+form.addEventListener("submit", async (e) => {
+
+  e.preventDefault();
+
+  if(!username.value || !message.value){
+    alert("Completa los campos");
+    return;
+  }
+
+  try{
+
+    await addDoc(collection(db, "Chat"), {
+      username: username.value,
+      text: message.value,
+      createdAt: Date.now()
+    });
+
+    message.value = "";
+
+  }catch(error){
+    console.error(error);
+    alert("Error al enviar mensaje");
+  }
+
+});
+
+const q = query(
+  collection(db, "Chat"),
+  orderBy("createdAt")
+);
+
+onSnapshot(q, (snapshot) => {
+
+  messages.innerHTML = "";
+
+  snapshot.forEach((doc) => {
+
+    const data = doc.data();
+
+    const div = document.createElement("div");
+
+    div.className = "message";
+
+    div.innerHTML = `
+      <strong>${data.username}</strong><br>
+      ${data.text}
+    `;
+
+    messages.appendChild(div);
+
+  });
+
+  messages.scrollTop = messages.scrollHeight;
+
+});
+
+</script>
+
+</body>
+</html>

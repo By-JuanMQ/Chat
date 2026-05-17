@@ -173,7 +173,7 @@ form.addEventListener("submit", async (e) => {
 
   if(message.value.trim() === "") return;
 
-  await addDoc(collection(db, "messages"), {
+  await addDoc(collection(db, "chat"), {
     username: username.value,
     text: message.value,
     createdAt: Date.now()
@@ -183,7 +183,7 @@ form.addEventListener("submit", async (e) => {
 });
 
 const q = query(
-  collection(db, "messages"),
+  collection(db, "chat"),
   orderBy("createdAt")
 );
 

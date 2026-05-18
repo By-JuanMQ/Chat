@@ -123,7 +123,9 @@ import {
 
 import {
   getAuth,
-  signInAnonymously
+  signInAnonymously,
+  setPersistence,
+  browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
@@ -140,12 +142,21 @@ const db = getFirestore(app);
 
 const auth = getAuth(app);
 
-signInAnonymously(auth)
+setPersistence(auth, browserLocalPersistence)
 .then(() => {
-  console.log("Usuario conectado");
+
+  return signInAnonymously(auth);
+
+})
+.then(() => {
+
+  console.log("Conectado correctamente");
+
 })
 .catch((error) => {
+
   console.error(error);
+
 });
 
 const form = document.getElementById("chatForm");
@@ -173,8 +184,10 @@ form.addEventListener("submit", async (e) => {
     message.value = "";
 
   }catch(error){
+
     console.error(error);
     alert("Error al enviar mensaje");
+
   }
 
 });
